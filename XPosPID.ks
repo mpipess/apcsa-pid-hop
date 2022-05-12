@@ -1,39 +1,37 @@
-function ascentPID {
-    declare parameter targetAlt.
-
-    set zVel to zVel + ship:sensors:acc:z * deltaTime.
+function xPosPID {
+    declare parameter posSetpoint.
 
     //Altitude P controller
-    local altSetpoint is targetAlt.
     local maxVelocity is 5.
     local minVelocity is -5.
-    local altKP is 1.
+    local posKP is 1.
 
-    lock altPV to currentAlt.
-    local altError is altSetpoint - altPV.
+    lock posPV to xPos.
+    local posError is posSetpoint - posPV.
 
-    local altP is altKP * altError.
-    local altU is altP.
+    local posP is posKP * posError.
+    local posU is posP.
 
-    if altU > maxVelocity {
-        set altU to maxVelocity.
+    if posU > maxVelocity {
+        set posU to maxVelocity.
     }
-    else if altU < minVelocity {
-        set altU to minVelocity.
+    else if posU < minVelocity {
+        set posU to minVelocity.
     }
 
     //Velocity PD controller
-    local velSetpoint is altU.
+    local velSetpoint is posU.
     local velKP is 0.1.
     local velKD is 0.1.
 
-    lock velPV to zVel.
+    lock velPV to xVel.
     local velError is velSetpoint - velPV.
 
     local velP is velKP * velError.
 
-    local velErrorSlope is (velError - lastVelError) / lastInterval.
+    local velErrorSlope is (velError - lastXVelError) / lastInterval.
     local velD is velKD * velErrorSlope.
+    set lastXVelError to velError.
 
     local velU is velP + velD.
 
@@ -42,13 +40,13 @@ function ascentPID {
     local accKP is 0.01.
     local accKI is 0.01.
 
-    lock accPV to ship:sensors:acc:z.
+    lock accPV to ship:sensors:acc:x.
     local accError is accSetpoint - accPV.
 
     local accP is accKP * accError.
 
-    set accErrorIntegral to accErrorIntegral + accError * deltaTime.
-    local accI is accKI * accErrorIntegral.
+    set xAccErrorIntegral to xAccErrorIntegral + accError * deltaTime.
+    local accI is accKI * xAccErrorIntegral.
 
     local accU is accP + accI.
 
