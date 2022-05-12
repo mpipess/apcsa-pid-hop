@@ -1,51 +1,65 @@
 function ascentPID {
-    declare parameter dT.
     declare parameter targetAlt.
 
+    set zVel to zVel + ship:sensors:acc:z * deltaTime.
+
     //Altitude P controller
-    local outerSetpoint is targetAlt.
+    local altSetpoint is targetAlt.
     local maxVelocity is 5.
     local minVelocity is -5.
-    local outerKP is 1.
+    local altKP is 1.
 
-    lock outerPV to currentAlt.
-    local outerError is outerSetpoint - outerPV.
+    lock altPV to currentAlt.
+    local altError is altSetpoint - altPV.
 
-    local outerP is outerKP * outerError.
-    local outerU is outerP.
+    local altP is altKP * altError.
+    local altU is altP.
 
-    if outerU > maxVelocity {
-        set outerU to maxVelocity.
+    if altU > maxVelocity {
+        set altU to maxVelocity.
     }
-    else if outerU < minVelocity {
-        set outerU to minVelocity.
+    else if altU < minVelocity {
+        set altU to minVelocity.
     }
 
     //Velocity PD controller
-    local innerSetpoint is outerU.
-    local innerKP is 0.1.
-    local innerKI is 0.
-    local innerKD is 0.1.
+    local velSetpoint is altU.
+    local velKP is 0.1.
+    local velKD is 0.1.
 
-    lock innerPV to ship:verticalspeed.
-    local innerError is innerSetPoint - innerPV.
+    lock velPV to zVel.
+    local velError is velSetpoint - velPV.
 
-    local innerP is innerKP * innerError.
+    local velP is velKP * velError.
 
-    set integral to integral + innerError * deltaTime.
-    local innerI is innerKI * integral.
+    local velErrorSlope is (velError - lastVelError) / lastInterval.
+    local velD is velKD * velErrorSlope.
 
-    local errorSlope is (innerError - lastError) / lastInterval.
-    local innerD is innerKD * errorSlope.
+    local velU is velP + velD.
 
-    local innerU is innerP + innerI + innerD.
+    //Acceleration PI controller
+    local accSetpoint is velU.
+    local accKP is 0.01.
+    local accKI is 0.01.
 
-    lock throttle to (ship:mass / ship:maxthrust * 9.81) + innerU.
+    lock accPV to ship:sensors:acc:z.
+    local accError is accSetpoint - accPV.
 
-    if throttle > 1 {
+    local accP is accKP * accError.
+
+    set accErrorIntegral to accErrorIntegral + accError * deltaTime.
+    local accI is accKI * accErrorIntegral.
+
+    local accU is accP + accI.
+
+    if throttle + accU > 1 {
         lock throttle to 1.
     }
-    else if throttle < 0 {
+    else if throttle + accU < 0 {
         lock throttle to 0.
+    }
+    else {
+        local tempThrot is throttle + accU.
+        lock throttle to tempThrot.
     }
 }
