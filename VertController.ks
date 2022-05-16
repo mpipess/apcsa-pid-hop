@@ -1,5 +1,4 @@
-function ascentPID {
-    declare parameter dT.
+function altController {
     declare parameter targetAlt.
 
     //Altitude P controller

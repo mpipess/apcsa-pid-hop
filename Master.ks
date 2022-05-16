@@ -1,8 +1,14 @@
 clearscreen.
 
-runOncePath("0:HopCode/AscentPID").
+runOncePath("0:HopCode/VertController").
+runOncePath("0:HopCode/HorizController").
 
 declare hoverAlt is 20.
+declare originLong is ship:longitude.
+declare originLat is ship:latitude.
+
+declare kerbinCirc is Kerbin:radius * 2 * pi.
+declare metersToDeg is 360 / kerbinCirc.
 
 declare startTime is time:seconds.
 lock currentTime to time:seconds - startTime.
@@ -24,20 +30,34 @@ function delay {
 
 until currentAlt >= hoverAlt {
     delay().
-    ascentPID(deltaTime, hoverAlt).
+    altController(hoverAlt).
+    longController(originLong).
+    latController(originLat).
     print currentTime at (0, 9).
     print currentAlt at (0, 10).
 }
 declare climbTime is currentTime.
 until currentTime >= climbTime + 5 {
     delay().
-    ascentPID(deltaTime, hoverAlt).
+    altController(hoverAlt).
+    longController(originLong).
+    latController(originLat).
+    print currentTime at (0, 9).
+    print currentAlt at (0, 10).
+}
+until ship:longitude >= originLong + 10 * metersToDeg {
+    delay().
+    altController(hoverAlt).
+    longController(originLong + 10 * metersToDeg).
+    latController(originLat).
     print currentTime at (0, 9).
     print currentAlt at (0, 10).
 }
 until currentAlt < 0.1 {
     delay().
-    ascentPID(deltaTime, 0).
+    altController(0).
+    longController(originLong + 10 * metersToDeg).
+    latController(originLat).
     print currentTime at (0, 9).
     print currentAlt at (0, 10).
 }
