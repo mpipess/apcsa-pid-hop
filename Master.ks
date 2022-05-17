@@ -4,8 +4,10 @@ runOncePath("0:HopCode/VertController").
 runOncePath("0:HopCode/HorizController").
 
 declare hoverAlt is 20.
-declare originLong is ship:longitude.
-declare originLat is ship:latitude.
+declare originLng is ship:geoposition:lng.
+declare originLat is ship:geoposition:lat.
+lock currentLng to ship:geoposition:lng.
+lock currentLat to ship:geoposition:lat.
 
 declare kerbinCirc is Kerbin:radius * 2 * pi.
 declare metersToDeg is 360 / kerbinCirc.
@@ -18,7 +20,6 @@ lock currentAlt to ship:altitude - startAlt.
 global deltaTime is 0.
 global lastError is 0.
 global lastInterval is 1.
-global integral is 0.
 
 lock steering to heading(0, 90).
 
@@ -31,8 +32,8 @@ function delay {
 until currentAlt >= hoverAlt {
     delay().
     altController(hoverAlt).
-    longController(originLong).
-    latController(originLat).
+    longController(originLng).
+    //latController(originLat).
     print currentTime at (0, 9).
     print currentAlt at (0, 10).
 }
@@ -40,24 +41,24 @@ declare climbTime is currentTime.
 until currentTime >= climbTime + 5 {
     delay().
     altController(hoverAlt).
-    longController(originLong).
-    latController(originLat).
+    longController(originLng).
+    //latController(originLat).
     print currentTime at (0, 9).
     print currentAlt at (0, 10).
 }
-until ship:longitude >= originLong + 10 * metersToDeg {
+until currentLng >= originLong + 10 * metersToDeg {
     delay().
     altController(hoverAlt).
-    longController(originLong + 10 * metersToDeg).
-    latController(originLat).
+    longController(originLng + 10 * metersToDeg).
+    //latController(originLat).
     print currentTime at (0, 9).
     print currentAlt at (0, 10).
 }
 until currentAlt < 0.1 {
     delay().
     altController(0).
-    longController(originLong + 10 * metersToDeg).
-    latController(originLat).
+    longController(originLng + 10 * metersToDeg).
+    //latController(originLat).
     print currentTime at (0, 9).
     print currentAlt at (0, 10).
 }

@@ -23,21 +23,17 @@ function altController {
     //Velocity PD controller
     local innerSetpoint is outerU.
     local innerKP is 0.1.
-    local innerKI is 0.
     local innerKD is 0.1.
 
     lock innerPV to ship:verticalspeed.
     local innerError is innerSetPoint - innerPV.
 
     local innerP is innerKP * innerError.
-
-    set integral to integral + innerError * deltaTime.
-    local innerI is innerKI * integral.
-
+    
     local errorSlope is (innerError - lastError) / lastInterval.
     local innerD is innerKD * errorSlope.
 
-    local innerU is innerP + innerI + innerD.
+    local innerU is innerP + innerD.
 
     lock throttle to (ship:mass / ship:maxthrust * 9.81) + innerU.
 

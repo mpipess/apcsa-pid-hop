@@ -11,7 +11,7 @@ function longController {
     local kP is 0.01.
     local kD is 0.01.
 
-    local error is setpoint - ship:longitude.
+    local error is setpoint - currentLng.
     local errorSlope is (error - lastLongError) / deltaTime.
 
     local p is kP * error.
@@ -42,7 +42,7 @@ function latController {
     local kP is 0.01.
     local kD is 0.01.
 
-    local error is setpoint - ship:latitude.
+    local error is setpoint - currentLat.
     local errorSlope is (error - lastLatError) / deltaTime.
 
     local p is kP * error.
